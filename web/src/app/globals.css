@@ -5,55 +5,34 @@
 }
 
 body {
-  @apply
-    bg-[var(--background)]
-    text-black
-    font-sans
-  ;
+  @apply bg-[var(--background)] text-black font-sans;
 }
 
 main {
-  @apply
-    py-[5em]
-    px-[3em]
-    w-[100vw]
-    h-[100vh]
-    m-0
-  ;
+  @apply py-[5em] px-[3em] w-[100vw] h-[100vh] m-0 relative overflow-hidden;
 }
 
 button {
-  @apply
-    cursor-pointer
-    transition-transform 
-    transform 
-    outline-0
-  ;
+  @apply cursor-pointer transition-transform transform outline-0;
 }
 
 button:hover {
-  @apply
-      opacity-65
-      shadow-lg
-      scale-105
-    ;
+  @apply opacity-65 shadow-lg scale-105;
 }
 
 input {
-  @apply
-    outline-0
-    transition-transform 
-    transform 
-  ;
+  @apply outline-0 transition-transform transform;
 }
 
 input:focus {
-  @apply
-    scale-105
-  ;
+  @apply scale-105;
 }
 
-h1, h2, h3, h4, h5 {
+h1,
+h2,
+h3,
+h4,
+h5 {
   font-weight: bold;
   text-align: center;
 }
@@ -79,11 +58,5 @@ h5 {
 }
 
 .container {
-  @apply
-    flex
-    items-center
-    flex-col
-    h-full
-    m-auto
-  ;
+  @apply flex items-center flex-col h-full m-auto;
 }

@@ -1,28 +1,54 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
-import { api } from "@/api";
-import { RootState } from "@/redux/store";
+import { api } from "@/fetch-api";
 import { returnToast } from "@/utils/toast";
 import { setLoading } from "@/redux/slices/loadingSlice";
 import { setUser } from "@/redux/slices/userSlice";
-
-const isAuthenticated = () => {
-  return !!localStorage.getItem("userToken");
-};
+import { UserType } from "@/interface/User";
 
 export default function Login() {
-
-  const router = useRouter();
+	const router = useRouter();
 	const dispatch = useDispatch();
-	const isLoading = useSelector((state: RootState) => state.loading.isLoading);
 
+	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [confirmPassword, setConfirmPassoword] = useState("");
 	const [errors, setErrors] = useState<string[]>([]);
+	const [registering, setRegistering] = useState(false);
+
+	const handleRedirect = async (message: string, userToken: string, userData: UserType) => {
+		await fetch('/api/setToken', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ token: userToken }),
+		});
+
+		returnToast(message, "success");
+		dispatch(setUser(userData));
+		
+		const response = await fetch('/api/redirect', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			}
+		});			
+		
+		if(!response?.ok) {
+			throw new Error("Houve um erro inesperado, tente novamente");
+		}
+
+		const responseJson: {
+			redirectPath: string
+		} = await response.json();
+		router.push(responseJson.redirectPath);
+	}
 
   async function logon() {
     dispatch(setLoading(true));
@@ -40,12 +66,7 @@ export default function Login() {
 
 			const { message, accessToken, ...rest } = data;
 
-			returnToast(message, "success");
-			dispatch(setUser(rest));
-			localStorage.setItem("userToken", accessToken);
-
-			router.push("/users"); 
-
+			await handleRedirect(message, accessToken, rest as UserType);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch(e: any) {
 			try {
@@ -71,18 +92,73 @@ export default function Login() {
       dispatch(setLoading(false));
     }
   }
-	
-  useEffect(() => {
-    if (isAuthenticated()) {
-      router.push("/login"); 
-    }
-  }, []);
+
+	async function register() {
+		dispatch(setLoading(true));
+
+		const url = '/register';
+
+		try {
+			const data = await api(url, {
+				method: 'POST',
+				body: JSON.stringify({
+					email,
+					password,
+					name,
+					confirmPassword
+				})
+			});
+
+			const { message, accessToken, ...rest } = data;
+
+			await handleRedirect(message, accessToken, rest as UserType);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch(e: any) {
+			try {
+				const errorData = JSON.parse(e?.message as string); 
+				if (errorData.statusCode === 400 && errorData.errors) {
+					errorData.errors.forEach((err: { 
+						property: string;
+						errorMessage: string;
+					}) => {
+						setErrors((e) => e.concat(err.property));
+						returnToast(err.errorMessage, 'error');
+					});
+				} else if (errorData.message){
+					returnToast(errorData.message, 'error');
+				} else {
+					returnToast('Erro desconhecido, contate o suporte', 'error');
+				}
+			} catch(e: unknown) {	
+				console.error(e);
+				returnToast('Erro no login, verifique as informações enviadas!', 'error');
+			}
+		} finally {
+			dispatch(setLoading(false));
+		}		
+	}
   
   return (
     <div className="container">
-      <h1>Login</h1>
+      <h1>{registering ? "Registro" : "Login"}</h1>
       <h5 className="mt-5">Cadastro e Gerenciamento de Usuários</h5>
       <div className="flex flex-col m-auto gap-5 pb-8">
+				{registering && <div className="flex flex-col gap-1">
+					<label className="text-xl">Nome</label>
+					<input 
+						placeholder="Nome do usuário"
+						type="text"
+						className={`border-[1px] rounded-sm py-2 px-3 min-w-sm shadow-md ${errors.includes('name') ? 'border-red-600' : ''}`}
+						value={name}
+						onChange={({ target: { value } }) => {
+							setName(value);
+							setErrors((error) => error.filter(e => e !== 'name'));
+						}}
+						onKeyDown={(e) => {
+							if(e.key === 'Enter') register();
+						}}
+					/>
+				</div>}
 				<div className="flex flex-col gap-1">
 					<label className="text-xl">E-mail</label>
 					<input 
@@ -95,7 +171,9 @@ export default function Login() {
 							setErrors((error) => error.filter(e => e !== 'email'));
 						}}
 						onKeyDown={(e) => {
-							if(e.key === 'Enter') logon();
+							if(e.key === 'Enter') {
+								return registering ? register() : logon();
+							};
 						}}
 					/>
 				</div>
@@ -111,16 +189,40 @@ export default function Login() {
 							setErrors((error) => error.filter(e => e !== 'password'));
 						}}
 						onKeyDown={(e) => {
-							if(e.key === 'Enter') logon();
+							if(e.key === 'Enter') {
+								return registering ? register() : logon();
+							};
 						}}
 					/>
 				</div>
-				<div className="mt-8 w-full flex items-center justify-end">
+				{registering && <div className="flex flex-col gap-1">
+					<label className="text-xl">Confirme a senha</label>
+					<input 
+						placeholder="******"
+						type="password"
+						className={`border-[1px] rounded-sm py-2 px-3 min-w-sm shadow-md ${errors.includes('confirmPassword') ? 'border-red-600' : ''}`}
+						value={confirmPassword} 
+						onChange={({ target: { value } }) => {
+							setConfirmPassoword(value);
+							setErrors((error) => error.filter(e => e !== 'confirmPassword'));
+						}}
+						onKeyDown={(e) => {
+							if(e.key === 'Enter') register();
+						}}
+					/>
+				</div>}
+				<div className="mt-8 w-full flex items-center justify-between">
 					<button 
 						className="py-2 px-5 border-[1px] rounded-sm shadow-md"
-						onClick={logon}
+						onClick={() => setRegistering(!registering)}
 					>
-						Login
+						{registering ? "Cancelar" : "Registrar"}
+					</button>
+					<button 
+						className="py-2 px-5 border-[1px] rounded-sm shadow-md"
+						onClick={() => registering ? register() : logon()}
+					>
+						{registering ? "Cadastrar" : "Login"}
 					</button>
 				</div>
       </div>
