@@ -5,9 +5,10 @@ const initialState: UserType = {
   id: null,
   name: "",
   email: "",
-	dateBirth: null,
-	phone: null,
-	role: 'USER'
+  dateBirth: null,
+  phone: null,
+  role: 'USER',
+  registrationDate: new Date().toISOString()
 };
 
 const userSlice = createSlice({
@@ -17,7 +18,10 @@ const userSlice = createSlice({
     setUser: (state, action: PayloadAction<UserType>) => {
       return { ...action.payload };
     },
-    clearUser: () => initialState,
+    clearUser: () => {
+      localStorage.removeItem('user');
+      return initialState
+    }
   },
 });
 

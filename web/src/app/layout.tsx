@@ -6,23 +6,31 @@ import { Provider } from "react-redux";
 import { store } from "@/redux/store";
 import Loading from "@/components/Loading";
 import "./globals.css";
+import { SyncUserFromLocalStorage } from "@/utils/syncUserFromLocalStorage";
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body>
-        <Provider store={store}>
-            <Loading />
-            <main>
-              {children}
-            </main>
-            <ToastContainer />
-        </Provider>
-      </body>
-    </html>
-  );
+  
+function SyncUser() {
+  SyncUserFromLocalStorage(); 
+  return null;
+}
+
+return (
+  <html lang="pt-br">
+    <body>
+      <Provider store={store}>
+          <SyncUser />
+          <Loading />
+          <main>
+            {children}
+          </main>
+          <ToastContainer />
+      </Provider>
+    </body>
+  </html>
+);
 }

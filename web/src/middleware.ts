@@ -20,7 +20,6 @@ export async function middleware(request: NextRequest) {
   if (!response?.user?.id) {
     throw new Error('Erro ao consultar usuário');
   }
-	
   return NextResponse.next();
 }
 

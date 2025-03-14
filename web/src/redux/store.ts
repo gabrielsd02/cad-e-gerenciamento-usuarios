@@ -7,6 +7,7 @@ export const store = configureStore({
     loading: loadingReducer,
     user: userReducer,
   },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

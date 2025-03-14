@@ -7,28 +7,33 @@ import { useRouter } from "next/navigation";
 import { api } from "@/fetch-api";
 import { setLoading } from "@/redux/slices/loadingSlice";
 import { RootState } from "@/redux/store";
-import { setUser } from "@/redux/slices/userSlice";
 import { returnToast } from "@/utils/toast";
 import Topbar from "@/components/Topbar";
 import FormUser from "@/components/FormUser";
+import { UserType } from "@/interface/User";
 
-export default function Profile() {
+export default function Edit({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const router = useRouter();
   const dispatch = useDispatch();
-  const user = useSelector((state: RootState) => state.user);
+	const user = useSelector((state: RootState) => state.user);
 
 	const [userToken, setUserToken] = useState(null);
-	const [email, setEmail] = useState(user?.email || null);
-	const [name, setName] = useState(user?.name || null);
-	const [role, setRole] = useState(user?.role || null);
-	const [dateBirth, setDateBirth] = useState(user.dateBirth || null);
-	const [phone, setPhone] = useState(user.phone || null);
+	const [email, setEmail] = useState<string | null>(null);
+	const [name, setName] = useState<string | null>(null);
+	const [role, setRole] = useState<UserType['role']>('USER');
+	const [dateBirth, setDateBirth] = useState<Date | null>(null);
+	const [phone, setPhone] = useState<string | null>(null);
 	const [errors, setErrors] = useState<string[]>([]);
 
 	async function save() {
 		dispatch(setLoading(true));
  
-		const url = `/user/${user.id}`;
+		const id = (await params).id;
+		const url = `/user/${id}`;
 		
 		try {
 			const response = await api(url, {
@@ -43,10 +48,6 @@ export default function Profile() {
 					Authorization: `Bearer ${userToken}`,
 				}
 			});
-
-			dispatch(setUser(response.user));
-			localStorage.setItem('user', JSON.stringify(response.user)); 
-
 			returnToast(response.message, 'success');
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch(e: any) {
@@ -73,6 +74,33 @@ export default function Profile() {
 			dispatch(setLoading(false));
 		}
 	} 
+	
+	async function consultUserById(token: string) {
+		dispatch(setLoading(true));
+
+		const id = (await params).id;
+		const url = `/user/${id}`;
+
+		try {
+			const data: UserType = await api(url, {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
+			});
+
+			setEmail(data.email);
+			setName(data.name);
+			setRole(data.role);
+			setDateBirth(data.dateBirth);
+			setPhone(data.phone);
+		} catch(e) {
+			console.error(e);
+			returnToast('Usuário não encontrado', 'error');
+		} finally {	
+			dispatch(setLoading(false));
+		}
+	}
 
 	async function consultUserToken() {
 		dispatch(setLoading(true));
@@ -93,6 +121,7 @@ export default function Profile() {
 			
       const responseJson = await response.json(); 
 			setUserToken(responseJson.userToken);
+			consultUserById(responseJson.userToken);
 		} catch(e) {
 			console.error(e);
 			returnToast('Erro de autenticação! Por favor, refaça o login', 'error');
@@ -105,7 +134,7 @@ export default function Profile() {
 	useEffect(() => {
 		consultUserToken();
 	}, [])
-	
+
   if(!user) return <></>
   
   return (<>
@@ -117,7 +146,7 @@ export default function Profile() {
 			router={router}
 		/>
     <div className="container gap-10">
-      <h1>Meu Perfil</h1>
+      <h1>Editar</h1>
 			{userToken && <FormUser 
 				editing
 				isAdmin={user?.role === 'ADMIN'}

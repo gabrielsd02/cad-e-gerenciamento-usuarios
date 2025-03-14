@@ -7,4 +7,5 @@ export interface UserType {
 	dateBirth: Date | null;
 	phone: string | null;
 	role: UserRole;
+	registrationDate: Date | string;
 }

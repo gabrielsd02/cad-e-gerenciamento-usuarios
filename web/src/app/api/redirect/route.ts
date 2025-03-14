@@ -12,10 +12,10 @@ export async function POST(request: Request) {
     const data = await getUserInfo(token.value);
     const user = data.user;
 
-    let redirectPath = '/profile'
+    let redirectPath = '/users'
     
-    if (user.role === 'ADMIN') {
-      redirectPath = '/users';
+    if (user.role === 'USER') {
+      redirectPath = '/profile';
     }
 
     return NextResponse.json({ redirectPath });

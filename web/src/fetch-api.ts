@@ -11,11 +11,9 @@ export const api = (url: string, options = {} as RequestInit) => {
 		...options,
 		headers,
 	})
-		.then(response => {			
-			if (!response.ok) {
-				return response.json().then(errorData => {
-          throw new Error(JSON.stringify(errorData)); // Passa os detalhes do erro
-        });
+		.then(response => {	
+			if (!response.ok) {				
+				return response.text().then(text => { throw new Error(text) });
 			}
 			return response.json(); 
 		})

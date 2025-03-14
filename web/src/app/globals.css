@@ -9,11 +9,21 @@ body {
 }
 
 main {
-  @apply py-[5em] px-[3em] w-[100vw] h-[100vh] m-0 relative overflow-hidden;
+  @apply pb-[5rem] py-[9rem] px-[3em] w-[100vw] h-[100vh] m-0 relative overflow-hidden;
 }
 
 button {
-  @apply cursor-pointer transition-transform transform outline-0;
+  @apply 
+    cursor-pointer 
+    transition-transform 
+    transform 
+    outline-0
+    py-2 
+    px-5 
+    border-[1px] 
+    rounded-sm 
+    shadow-md
+  ;
 }
 
 button:hover {
@@ -21,7 +31,17 @@ button:hover {
 }
 
 input {
-  @apply outline-0 transition-transform transform;
+  @apply 
+    outline-0 
+    transition-transform 
+    transform
+    border-[1px] 
+    rounded-sm 
+    py-2 
+    px-3 
+    min-w-sm 
+    shadow-md
+  ;
 }
 
 input:focus {

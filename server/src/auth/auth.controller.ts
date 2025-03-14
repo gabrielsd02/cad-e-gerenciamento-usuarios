@@ -7,16 +7,37 @@ import {
   Get,
   Headers,
   UnauthorizedException,
-  BadRequestException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
+
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { AuthHeaderDto } from './dto/auth-header.dto';
-import { RegisterDto } from './dto/register.dto';
+import { HeaderDto } from '../dto/headerDto';
+import { UserService } from 'src/user/user.service';
 
 @Controller()
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+  ) {}
+
+  @Get('auth')
+  @HttpCode(HttpStatus.OK)
+  async authenticate(@Headers() headers: HeaderDto) {
+    const token = headers?.authorization?.split(' ')[1];
+    if (!token) {
+      throw new UnauthorizedException('Token não enviado');
+    }
+
+    const user = await this.userService.getUserFromToken(token);
+    return {
+      message: 'Informações do usuário recuperadas',
+      user,
+    };
+  }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -28,40 +49,6 @@ export class AuthController {
     return {
       message: 'Login bem-sucedido',
       ...tokenAndData,
-    };
-  }
-
-  @Post('register')
-  @HttpCode(HttpStatus.OK)
-  async register(@Body() registerDto: RegisterDto) {
-    if (registerDto.password !== registerDto.confirmPassword) {
-      throw new BadRequestException(
-        'A senha e a confirmação devem ser iguais.',
-      );
-    }
-    const tokenAndData = await this.authService.register(
-      registerDto.email,
-      registerDto.name,
-      registerDto.password,
-    );
-    return {
-      message: 'Registro bem-sucedido, Bem-vindo!',
-      ...tokenAndData,
-    };
-  }
-
-  @Get('auth')
-  @HttpCode(HttpStatus.OK)
-  async authenticate(@Headers() headers: AuthHeaderDto) {
-    const token = headers?.authorization?.split(' ')[1];
-    if (!token) {
-      throw new UnauthorizedException('Token não enviado');
-    }
-
-    const user = await this.authService.getUserFromToken(token);
-    return {
-      message: 'Informações do usuário recuperadas',
-      user,
     };
   }
 }
