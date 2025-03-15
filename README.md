@@ -7,3 +7,5 @@
 *Um usuário admin é criado logo ao iniciar o projeto
 <br/>
 *Não contém testes unitários
+<br/>
+*Desenvolvimento iniciado no dia 08/03
