@@ -8,9 +8,8 @@ import { api } from "@/fetch-api";
 import { setLoading } from "@/redux/slices/loadingSlice";
 import { RootState } from "@/redux/store";
 import { returnToast } from "@/utils/toast";
-import Topbar from "@/components/Topbar";
-import FormUser from "@/components/FormUser";
 import { UserType } from "@/interface/User";
+import FormUser from "@/components/FormUser";
 
 export default function Register() {
 	const router = useRouter();
@@ -117,14 +116,7 @@ export default function Register() {
 
   if(!user) return <></>
   
-  return (<>
-    <Topbar 
-			emailUser={user?.email}
-			nameUser={user?.name}
-			roleUser={user?.role}
-			dispatch={dispatch}
-			router={router}
-		/>
+  return (
     <div className="container gap-10">
       <h1>Cadastro de Usuário</h1>
 			{userToken && <FormUser 
@@ -146,5 +138,5 @@ export default function Register() {
 				setPassword={setPassword}
 			/>}
     </div>
-  </>);
+  );
 }

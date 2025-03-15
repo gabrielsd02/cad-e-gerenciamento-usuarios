@@ -3,13 +3,12 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { FaCirclePlus, FaPen, FaTrash } from "react-icons/fa6";
+import { FaCirclePlus, FaPen, FaTrash, FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 
 import { UserType } from "@/interface/User";
 import { setLoading } from "@/redux/slices/loadingSlice";
 import { RootState } from "@/redux/store";
 import { returnToast } from "@/utils/toast";
-import Topbar from "@/components/Topbar";
 import Modal from "@/components/Modal";
 
 interface ResponseProps {
@@ -21,12 +20,13 @@ interface ResponseProps {
 }
 
 export default function UsersList() {
-  const RECORDS_PER_PAGE = 30;
+  const RECORDS_PER_PAGE = 10;
 
   const router = useRouter();
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
   const isAdmin = user?.role === 'ADMIN';
+  const isUser = user?.role === 'USER';
   
   const [users, setUsers] = useState<UserType[]>([]);
   const [page, setPage] = useState(1);
@@ -130,13 +130,6 @@ export default function UsersList() {
   if(!user) return <></>
   
   return (<>
-    <Topbar 
-			emailUser={user?.email}
-			nameUser={user?.name}
-      roleUser={user?.role}
-			dispatch={dispatch}
-			router={router}
-		/>
     <div className="container gap-10">
       <h1>Lista de Usuários</h1>
       {(user) && <div className="flex flex-col w-[80%] m-auto min-h-[60%] gap-5 overflow-x-hidden overflow-y-auto py-2">
@@ -162,27 +155,25 @@ export default function UsersList() {
         <table className={'w-full'}>
           <thead className="h-12">
             <tr className="border-b-[1px] border-t-[1px] first:border-l-[1px] last:border-r-[1px]">
-              <th className="text-center min-w-[50px] border-r-[1px]">ID</th>
               <th className="text-center min-w-[80px]! border-r-[1px]">Nome</th>
               <th className="text-center min-w-[50px] border-r-[1px]">Email</th>
               <th className="text-center min-w-[50px] border-r-[1px]">Nível de Acesso</th>
               <th className="text-center min-w-[100px]! border-r-[1px]">Criado em</th>
-              <th className="text-right min-w-[50px]! pr-2">Opções</th>
+              {!isUser && <th className="text-right min-w-[50px]! pr-2">Opções</th>}
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
               <tr key={user.id} className="h-14 my-5 border-b-[1px]">
-                <td className="text-center h-auto border-[1px]">{user.id}</td>
-                <td className="text-center h-auto border-r-[1px]">{user.name}</td>
+                <td className="text-center h-auto border-[1px]">{user.name}</td>
                 <td className="text-center h-auto border-r-[1px]">{user.email}</td>
                 <td className="text-center h-auto border-r-[1px]">{user.role}</td>
                 <td className="text-center h-auto border-r-[1px]">
                   {new Date(user?.registrationDate).toLocaleDateString()} às {new Date(user?.registrationDate).toLocaleTimeString().slice(0, 5)}
                 </td>
-                <td className="h-auto border-r-[1px]">
+                {!isUser && <td className="h-auto border-r-[1px]">
                   <div className="flex gap-3 justify-end pr-3">
-                    <button
+                   <button
                       className="border-0! p-0! shadow-none!"
                       onClick={() => router.push(`/edit/${user.id}`)}
                     >
@@ -195,14 +186,32 @@ export default function UsersList() {
                       <FaTrash />
                     </button>}
                   </div>
-                </td>
+                </td>}
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="w-full flex items-center justify-between min-h-14 grow">
-          <p>Total páginas: {totalPages}</p>
-          <p>TOTAL: {totalRecords}</p>
+        <div className="w-full flex items-center justify-between min-h-20">
+          <p>TOTAL REGISTROS: {totalRecords}</p>
+          <div className="flex gap-3 items-center justify-center">
+            <FaAngleLeft 
+              size={32}
+              className={`cursor-pointer ${page <= 1 ? 'opacity-30' : ''}`}
+              onClick={() => {
+                if(page <= 1) return;
+                setPage(page - 1);
+              }}
+            />
+            <h5 className="mb-1">{page}</h5>
+            <FaAngleRight 
+              size={32}
+              className={`cursor-pointer ${page >= totalPages ? 'opacity-30' : ''}`}
+              onClick={() => {
+                if(page >= totalPages) return;
+                setPage(page + 1);
+              }}
+            />
+          </div>          
         </div>
       </div>}
     </div>

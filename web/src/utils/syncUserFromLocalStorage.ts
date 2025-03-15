@@ -13,7 +13,7 @@ import { isJsonString } from "./isJsonString";
 export function SyncUserFromLocalStorage() {
 	const user = useSelector((state: RootState) => state.user);
 	const dispatch = useDispatch();	
-
+	
 	const updateUserFromLocalStorage = useCallback(() => {
 		if(!dispatch || !localStorage) return;
 		const userString = localStorage.getItem('user');

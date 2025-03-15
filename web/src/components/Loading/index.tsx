@@ -8,8 +8,8 @@ export default function Loading() {
   if (!isLoading) return null; 
 
   return (
-    <div className="fixed inset-0 bg-black opacity-50 flex flex-col gap-5 justify-center items-center z-40">
-      <div className="w-20 h-20 border-6 border-blue-500 border-t-transparent rounded-full animate-spin z-50"/>
+    <div className="fixed inset-0 bg-black opacity-50 flex flex-col gap-5 justify-center items-center z-[999]">
+      <div className="w-20 h-20 border-6 border-blue-500 border-t-transparent rounded-full animate-spin z-[998]"/>
       <span className="text-xl tracking-wide leading-5 text-white z-50">Carregando...</span>
     </div>
   );

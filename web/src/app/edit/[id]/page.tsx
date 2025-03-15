@@ -8,9 +8,8 @@ import { api } from "@/fetch-api";
 import { setLoading } from "@/redux/slices/loadingSlice";
 import { RootState } from "@/redux/store";
 import { returnToast } from "@/utils/toast";
-import Topbar from "@/components/Topbar";
-import FormUser from "@/components/FormUser";
 import { UserType } from "@/interface/User";
+import FormUser from "@/components/FormUser";
 
 export default function Edit({
   params,
@@ -34,16 +33,24 @@ export default function Edit({
  
 		const id = (await params).id;
 		const url = `/user/${id}`;
+		const paramsBody = {
+			name,			
+			dateBirth,
+			phone
+		} as {
+			name: string;
+			dateBirth: Date,
+			phone: string,
+			role?: UserType['role']
+		};
+		if(user.role === 'ADMIN') {
+			paramsBody['role'] = role;
+		}
 		
 		try {
 			const response = await api(url, {
 				method: 'PUT',
-				body: JSON.stringify({
-					name,
-					role,
-					dateBirth,
-					phone
-				}),
+				body: JSON.stringify({...paramsBody}),
 				headers: {
 					Authorization: `Bearer ${userToken}`,
 				}
@@ -137,14 +144,7 @@ export default function Edit({
 
   if(!user) return <></>
   
-  return (<>
-    <Topbar 
-			emailUser={user?.email}
-			nameUser={user?.name}
-			roleUser={user?.role}
-			dispatch={dispatch}
-			router={router}
-		/>
+  return (
     <div className="container gap-10">
       <h1>Editar</h1>
 			{userToken && <FormUser 
@@ -165,5 +165,5 @@ export default function Edit({
 				setDateBirth={setDateBirth}
 			/>}
     </div>
-  </>);
+  );
 }

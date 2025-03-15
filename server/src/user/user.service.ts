@@ -1,4 +1,3 @@
-// user.service.ts
 import {
   ConflictException,
   Injectable,
@@ -9,7 +8,7 @@ import { User, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 import { PrismaService } from 'src/prisma/prisma.service';
-import { GetUsersDto } from './dto/getUsers.dto';
+import { GetUsersDto } from './dto/get-users.dto';
 
 @Injectable()
 export class UserService {
@@ -20,7 +19,6 @@ export class UserService {
 
   async getUsers(filters: GetUsersDto & { authUserId: number }) {
     const { search, page, recordsPerPage } = filters;
-
     const whereCondition = search
       ? {
           name: {
@@ -119,8 +117,6 @@ export class UserService {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = userUpdated;
       return result;
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e: unknown) {
       console.error(e);
       throw new Error(

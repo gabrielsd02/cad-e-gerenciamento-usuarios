@@ -13,7 +13,7 @@ import {
 
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { HeaderDto } from '../dto/headerDto';
+import { HeaderDto } from '../dto/header-dto';
 import { UserService } from 'src/user/user.service';
 
 @Controller()

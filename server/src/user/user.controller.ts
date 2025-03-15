@@ -5,31 +5,33 @@ import {
   HttpCode,
   HttpStatus,
   Put,
-  Headers,
-  UnauthorizedException,
   Post,
   Delete,
   Param,
   NotFoundException,
   BadRequestException,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 
 import { UserService } from './user.service';
-import { UpdateUserDto } from './dto/updateUser.dto';
-import { HeaderDto } from 'src/dto/headerDto';
-import { CreateUserDto } from './dto/createUser.dto';
-import { GetUsersDto } from './dto/getUsers.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { GetUsersDto } from './dto/get-users.dto';
+import { PermissionsGuard } from 'src/casl/permissions.guard';
+import { Action } from 'src/casl/caslAbility.factory';
+import { JwtAuthGuard } from 'src/auth/jwtAuthGuard.guard';
+import { CheckPolicies } from 'src/casl/casl.decorator';
+import { User } from 'src/decorators/user-decorator';
+import { User as UserType } from '@prisma/client';
 
 @Controller()
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Post('user')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @CheckPolicies([Action.Create, 'User'])
   @HttpCode(HttpStatus.OK)
   async create(@Body() createDto: CreateUserDto) {
     const user = await this.userService.create({
@@ -50,19 +52,11 @@ export class UserController {
   }
 
   @Get('users')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @CheckPolicies([Action.Read, 'all'])
   @HttpCode(HttpStatus.OK)
-  async list(@Query() filters: GetUsersDto, @Headers() headers: HeaderDto) {
-    const token = headers?.authorization?.split(' ')[1];
-    if (!token) {
-      throw new UnauthorizedException('Token não enviado');
-    }
-
-    const userToken = await this.userService.getUserFromToken(token);
-    if (!userToken) {
-      throw new UnauthorizedException('Usuário não possui permissão');
-    }
-
-    const authUserId = userToken.id;
+  async list(@Query() filters: GetUsersDto, @User() user: UserType) {
+    const authUserId = user.id;
     return await this.userService.getUsers({
       ...filters,
       authUserId,
@@ -70,44 +64,29 @@ export class UserController {
   }
 
   @Get('user/:id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @CheckPolicies([Action.Read, 'all'])
   @HttpCode(HttpStatus.OK)
-  async getById(@Param('id') id: string, @Headers() headers: HeaderDto) {
-    const token = headers?.authorization?.split(' ')[1];
-    console.log(id, token);
-    if (!token) {
-      throw new UnauthorizedException('Token não enviado');
-    }
-
-    const userToken = await this.userService.getUserFromToken(token);
-    if (!userToken) {
-      throw new UnauthorizedException('Usuário não possui permissão');
-    }
-
+  async getById(@Param('id') id: string) {
     return await this.userService.getById(parseInt(id));
   }
 
   @Put('user/:id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @CheckPolicies([Action.Update, 'User'])
   @HttpCode(HttpStatus.OK)
-  async update(
-    @Param('id') id: string,
-    @Body() updateDto: UpdateUserDto,
-    @Headers() headers: HeaderDto,
-  ) {
+  async update(@Param('id') id: string, @Body() updateDto: UpdateUserDto) {
     if (!id) {
       throw new BadRequestException(
-        'Identificador do usuário a ser deletado é obrigatório',
+        'Identificador do usuário a ser atualizado é obrigatório',
       );
     }
 
-    const token = headers?.authorization?.split(' ')[1];
-    if (!token) {
-      throw new UnauthorizedException('Token não enviado');
+    const userToUpdate = await this.userService.getById(parseInt(id));
+    if (!userToUpdate) {
+      throw new BadRequestException('Usuário não encontrado');
     }
 
-    const userToken = await this.userService.getUserFromToken(token);
-    if (!userToken) {
-      throw new UnauthorizedException('Usuário não possui permissão');
-    }
     const userUpdated = await this.userService.update({
       id: parseInt(id),
       ...updateDto,
@@ -119,22 +98,14 @@ export class UserController {
   }
 
   @Delete('user/:id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @CheckPolicies([Action.Delete, 'User'])
   @HttpCode(HttpStatus.OK)
-  async delete(@Param('id') id: string, @Headers() headers: HeaderDto) {
+  async delete(@Param('id') id: string) {
     if (!id) {
       throw new BadRequestException(
         'Identificador do usuário a ser deletado é obrigatório',
       );
-    }
-
-    const token = headers?.authorization?.split(' ')[1];
-    if (!token) {
-      throw new UnauthorizedException('Token não enviado');
-    }
-
-    const userToken = await this.userService.getUserFromToken(token);
-    if (!userToken) {
-      throw new UnauthorizedException('Você não possui permissão para isso');
     }
 
     const userWillDelete = await this.userService.getById(parseInt(id));

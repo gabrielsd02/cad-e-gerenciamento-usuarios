@@ -1,11 +1,10 @@
-// middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getUserInfo } from './utils/getUserInfo';
 
-export async function middleware(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
-  const token = request.cookies.get('userToken')?.value; 
+export async function middleware(req: NextRequest) {
+  const pathname = req.nextUrl.pathname;
+  const token = req.cookies.get('userToken')?.value; 
   const publicRoutes = ['/login', '/register'];
   
   if (publicRoutes.includes(pathname)) {
@@ -13,13 +12,21 @@ export async function middleware(request: NextRequest) {
   }
 	
   if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(new URL('/login', req.url));
   }
 
   const response = await getUserInfo(token);
   if (!response?.user?.id) {
     throw new Error('Erro ao consultar usuário');
   }
+  
+  if(response.user.role === 'USER') {
+    const routesPermitted = [...publicRoutes, '/', '/profile'];
+    if(!routesPermitted.includes(pathname)) {
+      return NextResponse.redirect(new URL('/', req.url));
+    }
+  }
+  
   return NextResponse.next();
 }
 

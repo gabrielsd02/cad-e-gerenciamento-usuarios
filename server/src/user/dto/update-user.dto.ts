@@ -33,6 +33,7 @@ export class UpdateUserDto {
   @Type(() => Date)
   dateBirth: Date;
 
+  @IsOptional()
   @IsIn(['ADMIN', 'MANAGER', 'USER'], {
     message: "O nível de acesso deve ser 'ADMIN', 'MANAGER' ou 'USER'",
   })

@@ -9,7 +9,7 @@ import { setLoading } from "@/redux/slices/loadingSlice";
 import { RootState } from "@/redux/store";
 import { setUser } from "@/redux/slices/userSlice";
 import { returnToast } from "@/utils/toast";
-import Topbar from "@/components/Topbar";
+import { UserType } from "@/interface/User";
 import FormUser from "@/components/FormUser";
 
 export default function Profile() {
@@ -29,16 +29,24 @@ export default function Profile() {
 		dispatch(setLoading(true));
  
 		const url = `/user/${user.id}`;
-		
+		const params = {
+			name,			
+			dateBirth,
+			phone
+		} as {
+			name: string;
+			dateBirth: Date,
+			phone: string,
+			role?: UserType['role']
+		};
+		if(user.role === 'ADMIN') {
+			params['role'] = role;
+		}
+
 		try {
 			const response = await api(url, {
 				method: 'PUT',
-				body: JSON.stringify({
-					name,
-					role,
-					dateBirth,
-					phone
-				}),
+				body: JSON.stringify({...params}),
 				headers: {
 					Authorization: `Bearer ${userToken}`,
 				}
@@ -108,14 +116,7 @@ export default function Profile() {
 	
   if(!user) return <></>
   
-  return (<>
-    <Topbar 
-			emailUser={user?.email}
-			nameUser={user?.name}
-			roleUser={user?.role}
-			dispatch={dispatch}
-			router={router}
-		/>
+  return (
     <div className="container gap-10">
       <h1>Meu Perfil</h1>
 			{userToken && <FormUser 
@@ -136,5 +137,5 @@ export default function Profile() {
 				setDateBirth={setDateBirth}
 			/>}
     </div>
-  </>);
+  );
 }

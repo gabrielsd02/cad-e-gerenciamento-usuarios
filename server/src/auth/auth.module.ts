@@ -4,7 +4,6 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from 'src/user/user.module';
-// import { RolesMiddleware } from './roles/roles.middleware';
 
 @Module({
   imports: [
@@ -20,8 +19,3 @@ import { UserModule } from 'src/user/user.module';
   exports: [JwtModule],
 })
 export class AuthModule {}
-// export class AuthModule implements NestModule {
-//   configure(consumer: MiddlewareConsumer) {
-//     consumer.apply(RolesMiddleware).forRoutes(AuthController);
-//   }
-// }

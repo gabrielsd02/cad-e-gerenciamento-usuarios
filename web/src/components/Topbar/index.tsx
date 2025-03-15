@@ -1,29 +1,14 @@
 'use client'
 
-import { memo, useEffect, useState } from "react";
-import { Dispatch, UnknownAction } from '@reduxjs/toolkit/react';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
-
 import { logout } from "@/utils/logout";
-import { UserType } from "@/interface/User";
+import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
+import { RootState } from "@/redux/store";
 
-interface Props {
-  emailUser: string;
-	nameUser: string;
-  roleUser: UserType['role'];
-	dispatch: Dispatch<UnknownAction>;
-	router: AppRouterInstance;
-}
-
-function Topbar({
-	nameUser,
-  emailUser,
-	router,
-  roleUser,
-	dispatch
-}: Props) {
-
-  const [show, setShow] = useState(false);
+export default function Topbar() {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const user = useSelector((state: RootState) => state.user);
 
 	const handleLogout = () => {
     logout(dispatch, router);
@@ -42,16 +27,12 @@ function Topbar({
         break;
     }
   }
-
-  useEffect(() => {
-    setShow((nameUser || emailUser) ? true : false);
-  }, [nameUser, emailUser])
   
 	return (
-		(show) && <nav className="absolute left-0 top-0 w-full py-6 px-18 shadow-lg bg-[#5b5f72] border-b-gray-500 border-b-[1px]">
+		(user?.name) && <nav className="absolute left-0 top-0 w-full py-6 px-18 shadow-lg bg-[#5b5f72] border-b-gray-500 border-b-[1px] z-[998]">
       <div className="flex items-center w-full justify-between">
-        <h5>{`Bem-vindo ${nameUser || emailUser}`}</h5>
-        {roleUser === 'USER' ? <button 
+        <h5>{`Bem-vindo ${user?.name || user?.email}`}</h5>
+        {user?.role === 'USER' ? <button 
           className="border-0! p-0! shadow-none!"
           onClick={handleLogout}
         >
@@ -75,5 +56,3 @@ function Topbar({
 	)
 
 }
-
-export default memo(Topbar)

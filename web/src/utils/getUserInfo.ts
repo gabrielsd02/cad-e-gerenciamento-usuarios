@@ -1,7 +1,7 @@
 import { api } from "@/fetch-api";
 import { UserType } from "@/interface/User";
 
-export async function getUserInfo(token: string) {
+export async function getUserInfo(token: string): Promise<{ user: UserType}> {
   const response: { user: UserType } = await api('/auth', {
     method: 'GET',
     headers: {
