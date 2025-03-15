@@ -1,4 +1,4 @@
-# História de Usuário - Cadastro e Gerenciamento de Usuários com Controle de Acesso
+# Cadastro e Gerenciamento de Usuários com Controle de Acesso
 
 ## Back-end (NestJS + PostgreSQL + JWT + CASL + ORM Prisma)
 
