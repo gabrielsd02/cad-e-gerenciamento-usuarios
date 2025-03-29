@@ -30,7 +30,7 @@ export class CreateUserDto {
   @IsPhoneNumber('BR', {
     message: 'O telefone enviado deve ser um telefone válido',
   })
-  phone: string;
+  phone: string | null;
 
   @IsOptional()
   @IsDate({ message: 'A data de nascimento deve ser uma data válida' })
@@ -38,7 +38,7 @@ export class CreateUserDto {
     message: 'A data de nascimento não pode estar no futuro',
   })
   @Type(() => Date)
-  dateBirth: Date;
+  dateBirth: Date | null;
 
   @IsIn(['ADMIN', 'MANAGER', 'USER'], {
     message: "O nível de acesso deve ser 'ADMIN', 'MANAGER' ou 'USER'",

@@ -26,3 +26,17 @@ model User {
 
   @@map("user")
 }
+
+model UserTest {
+  id               Int       @id @default(autoincrement())
+  name             String    @db.VarChar(60)
+  email            String    @unique @db.VarChar(60)
+  password         String    @db.VarChar(120)
+  role             Role      @default(USER)
+  phone            String?   @db.VarChar(30)
+  dateBirth        DateTime? @map("date_birth") @db.Date
+  registrationDate DateTime  @default(dbgenerated("CURRENT_TIMESTAMP")) @map("registration_date") @db.Timestamp()
+  active           String    @default("S") @db.Char(1)
+
+  @@map("user_test")
+}

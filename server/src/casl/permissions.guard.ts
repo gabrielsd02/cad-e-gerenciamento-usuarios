@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { CaslAbilityFactory, Action } from './caslAbility.factory';
 import { ForbiddenException } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
 import { Request } from 'express';
 
 @Injectable()

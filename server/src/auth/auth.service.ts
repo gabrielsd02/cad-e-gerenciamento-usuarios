@@ -48,4 +48,40 @@ export class AuthService {
       ...payload,
     };
   }
+
+  async loginTest(email: string, password: string) {
+    const user = await this.validateUserTest(email, password);
+    const payload = {
+      email: user.email,
+      id: user.id,
+      name: user.name,
+      dateBirth: user.dateBirth,
+      phone: user.phone,
+      role: user.role,
+    };
+    return {
+      accessToken: await this.jwtService.signAsync(payload),
+      ...payload,
+    };
+  }
+
+  async validateUserTest(
+    email: string,
+    pass: string,
+  ): Promise<Omit<User, 'password'>> {
+    const user = await this.prisma.userTest.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('E-mail não encontrado!');
+    }
+    if (!(await bcrypt.compare(pass, user.password))) {
+      throw new UnauthorizedException('Senha incorreta!');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...result } = user;
+    return result;
+  }
 }

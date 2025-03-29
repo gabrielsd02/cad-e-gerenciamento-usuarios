@@ -14,7 +14,7 @@ import {
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { HeaderDto } from '../dto/header-dto';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
 
 @Controller()
 export class AuthController {

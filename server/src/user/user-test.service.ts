@@ -12,7 +12,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { GetUsersDto } from './dto/get-users.dto';
 
 @Injectable()
-export class UserService {
+export class UserTestService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
@@ -28,7 +28,7 @@ export class UserService {
           },
         }
       : {};
-    const users = await this.prisma.user.findMany({
+    const users = await this.prisma.userTest.findMany({
       omit: {
         password: true,
       },
@@ -40,7 +40,7 @@ export class UserService {
       take: recordsPerPage,
       orderBy: { name: 'asc' },
     });
-    const totalRecords = await this.prisma.user.count({
+    const totalRecords = await this.prisma.userTest.count({
       where: {
         ...whereCondition,
         id: { not: filters.authUserId },
@@ -65,7 +65,7 @@ export class UserService {
   }: Omit<User, 'id' | 'active' | 'registrationDate'>): Promise<
     Error | Omit<User, 'password'>
   > {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.userTest.findUnique({
       where: { email },
     });
     if (user) {
@@ -74,7 +74,7 @@ export class UserService {
 
     const hashedPassword = await bcrypt.hash(password, 8);
     try {
-      const newUser = await this.prisma.user.create({
+      const newUser = await this.prisma.userTest.create({
         data: {
           name,
           email,
@@ -110,7 +110,7 @@ export class UserService {
     role,
   }: Omit<User, 'email' | 'password' | 'active' | 'registrationDate'>) {
     try {
-      const userUpdated = await this.prisma.user.update({
+      const userUpdated = await this.prisma.userTest.update({
         where: {
           id,
         },
@@ -134,14 +134,14 @@ export class UserService {
   }
 
   async getById(userId: number) {
-    const user = this.prisma.user.findUnique({
+    const user = this.prisma.userTest.findUnique({
       where: { id: userId },
     });
     return user;
   }
 
   async delete(userId: number) {
-    return this.prisma.user.delete({
+    return this.prisma.userTest.delete({
       where: { id: userId },
     });
   }
@@ -150,7 +150,7 @@ export class UserService {
     try {
       const jwtDecoded: User = this.jwtService.verify(token);
 
-      const user = await this.prisma.user.findUnique({
+      const user = await this.prisma.userTest.findUnique({
         where: {
           id: jwtDecoded.id,
           email: jwtDecoded.email,

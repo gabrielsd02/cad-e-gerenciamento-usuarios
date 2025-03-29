@@ -18,11 +18,11 @@ import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GetUsersDto } from './dto/get-users.dto';
-import { PermissionsGuard } from 'src/casl/permissions.guard';
-import { Action } from 'src/casl/caslAbility.factory';
-import { JwtAuthGuard } from 'src/auth/jwtAuthGuard.guard';
-import { CheckPolicies } from 'src/casl/casl.decorator';
-import { User } from 'src/decorators/user-decorator';
+import { PermissionsGuard } from '../casl/permissions.guard';
+import { Action } from '../casl/caslAbility.factory';
+import { JwtAuthGuard } from '../auth/jwtAuthGuard.guard';
+import { CheckPolicies } from '../casl/casl.decorator';
+import { User } from '../decorators/user-decorator';
 import { User as UserType } from '@prisma/client';
 
 @Controller()
@@ -37,17 +37,15 @@ export class UserController {
     const user = await this.userService.create({
       ...createDto,
     });
-    const payload = {
-      email: user.email,
-      id: user.id,
-      name: user.name,
-      dateBirth: user.dateBirth,
-      phone: user.phone,
-      role: user.role,
-    };
+    if (!user || user instanceof Error) {
+      throw new BadRequestException(
+        'Erro ao criar o usuário, verifique as informações enviadas',
+      );
+    }
+
     return {
       message: 'Usuário cadastrado com sucesso!',
-      ...payload,
+      ...user,
     };
   }
 
@@ -57,6 +55,9 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   async list(@Query() filters: GetUsersDto, @User() user: UserType) {
     const authUserId = user.id;
+    if (!authUserId) {
+      throw new BadRequestException('Identificador do usuário é obrigatório');
+    }
     return await this.userService.getUsers({
       ...filters,
       authUserId,
