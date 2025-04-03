@@ -103,9 +103,9 @@ export class UserTestService {
   }
 
   async update({
+    id,
     name,
     dateBirth,
-    id,
     phone,
     role,
   }: Omit<User, 'email' | 'password' | 'active' | 'registrationDate'>) {
@@ -125,8 +125,8 @@ export class UserTestService {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = userUpdated;
       return result;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e: unknown) {
-      console.error(e);
       throw new Error(
         'Erro ao atualizar o usuário. Tente novamente mais tarde.',
       );
@@ -141,15 +141,19 @@ export class UserTestService {
   }
 
   async delete(userId: number) {
-    return this.prisma.userTest.delete({
-      where: { id: userId },
-    });
+    try {
+      return this.prisma.userTest.delete({
+        where: { id: userId },
+      });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (e: unknown) {
+      throw new Error('Erro ao remover o usuário. Tente novamente mais tarde.');
+    }
   }
 
   async getUserFromToken(token: string) {
     try {
       const jwtDecoded: User = this.jwtService.verify(token);
-
       const user = await this.prisma.userTest.findUnique({
         where: {
           id: jwtDecoded.id,

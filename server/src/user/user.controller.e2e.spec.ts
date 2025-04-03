@@ -32,7 +32,7 @@ describe('UserController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    prisma = moduleFixture.get(PrismaService);
+    prisma = new PrismaService();
     authService = moduleFixture.get(AuthService);
 
     const password = '123456';

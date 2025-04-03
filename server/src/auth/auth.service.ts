@@ -51,6 +51,9 @@ export class AuthService {
 
   async loginTest(email: string, password: string) {
     const user = await this.validateUserTest(email, password);
+    if (!user) {
+      throw new Error('Usuário não encontrado');
+    }
     const payload = {
       email: user.email,
       id: user.id,

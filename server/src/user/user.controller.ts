@@ -20,10 +20,10 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { GetUsersDto } from './dto/get-users.dto';
 import { PermissionsGuard } from '../casl/permissions.guard';
 import { Action } from '../casl/caslAbility.factory';
-import { JwtAuthGuard } from '../auth/jwtAuthGuard.guard';
 import { CheckPolicies } from '../casl/casl.decorator';
 import { User } from '../decorators/user-decorator';
 import { User as UserType } from '@prisma/client';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller()
 export class UserController {

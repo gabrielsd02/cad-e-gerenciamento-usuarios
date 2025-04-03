@@ -1,13 +1,14 @@
+import { User } from '@prisma/client';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserController } from './user.controller';
-import { UserService } from './user.service';
 import { BadRequestException } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { PermissionsGuard } from '../casl/permissions.guard';
-import { User } from '@prisma/client';
-import { CreateUserDto } from './dto/create-user.dto';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
+
+import { UserController } from './user.controller';
+import { UserService } from './user.service';
+import { PermissionsGuard } from '../casl/permissions.guard';
+import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CaslAbilityFactory } from '../casl/caslAbility.factory';
 
@@ -26,7 +27,7 @@ describe('User Controller', () => {
     return await validate(instanceDto);
   };
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       imports: [JwtModule],
       controllers: [UserController],
